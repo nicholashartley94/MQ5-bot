@@ -114,7 +114,7 @@ void Bot()
     if (momentumSum > 5)
     {
         double tp = bid + (highestHigh - lowestLow);
-        double sl = ask - (highestHigh - lowestLow);
+        double sl = ask - (1);
         double roundedTP = NormalizeDouble(tp, _Digits);
         double roundedSL = NormalizeDouble(sl, _Digits);
         if (trade.Buy(lotSize, _Symbol))
@@ -130,7 +130,7 @@ void Bot()
     else if (momentumSum < -5)
     {
         double tp = ask - (highestHigh - lowestLow);
-        double sl = bid + (highestHigh - lowestLow);
+        double sl = bid + (1);
         double roundedTP = NormalizeDouble(tp, _Digits);
         double roundedSL = NormalizeDouble(sl, _Digits);
         if (trade.Sell(lotSize, _Symbol))
