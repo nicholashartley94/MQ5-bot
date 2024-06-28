@@ -10,8 +10,8 @@
 CTrade trade;
 
 // Define parameters
-input int momentumPeriod = 3;
-input int numberOfCandles = 10;
+input int momentumPeriod = 1;
+input int numberOfCandles = 5;
 input double lotSize = 0.01;
 input double spreadThreshold = 0.40;
 input double tpFactor = 1;
@@ -26,7 +26,7 @@ void OnTick()
   {
    // Retrieve historical candles
    MqlRates rates[];
-   int copied = CopyRates("XAUUSD", PERIOD_M1, 0, numberOfCandles, rates);
+   int copied = CopyRates("XAUUSD", PERIOD_M5, 0, numberOfCandles, rates);
    if(copied < numberOfCandles)
      {
       Print("Error retrieving historical data");
@@ -75,7 +75,7 @@ void Bot()
 
    // Retrieve historical candles
    MqlRates rates[];
-   int copied = CopyRates("XAUUSD", PERIOD_M1, 0, numberOfCandles, rates);
+   int copied = CopyRates("XAUUSD", PERIOD_M5, 0, numberOfCandles, rates);
    if(copied < numberOfCandles)
      {
       Print("Error retrieving historical data");
@@ -100,7 +100,7 @@ void Bot()
    Print("Lowest Low in Historical Data: ", lowestLow);
 
    // Check trading conditions
-   if(momentumSum > 1)
+   if(momentumSum > 10)
      {
       double tp = bid + (highestHigh-lowestLow);
       double sl = ask - (1);
@@ -116,7 +116,7 @@ void Bot()
       else
          Print("Error opening buy position: ", GetLastError());
      }
-   else if(momentumSum < -1)
+   else if(momentumSum < -10)
      {
       double tp = ask - (highestHigh-lowestLow);
       double sl = bid + (1);
