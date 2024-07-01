@@ -9,7 +9,8 @@ input int numberOfCandles = 5;
 input double lotSize = 0.01;
 input double spreadThreshold = 0.40;
 input int maPeriod = 5; 
-input double hedgeLossThreshold = -2.00;
+input double hedgeLossThreshold = -1.20;
+input double totalProfitThreshold = 2.00; // New input for total profit threshold
 
 datetime lastCloseTime = 0;
 datetime lastRunTime = 0;
@@ -42,6 +43,30 @@ void OnTick()
     {
         lastCloseTime = rates[0].time;
         Bot(rates);
+    }
+
+    // Check and close positions one by one
+    CheckAndClosePositions();
+}
+
+void CheckAndClosePositions()
+{
+    for (int i = PositionsTotal() - 1; i >= 0; i--)
+    {
+        if (PositionSelect(i))
+        {
+            string symbol = PositionGetString(POSITION_SYMBOL);
+            double profit = PositionGetDouble(POSITION_PROFIT);
+            
+            // Close position if profit meets threshold
+            if (profit >= totalProfitThreshold)
+            {
+                ulong ticket = PositionGetInteger(POSITION_TICKET);
+                Print("## Menutup posisi ", ticket, " karena profit mencapai ", totalProfitThreshold);
+                trade.PositionClose(ticket);
+                openPositions--; // Kurangi jumlah posisi terbuka
+            }
+        }
     }
 }
 
@@ -124,7 +149,7 @@ void Bot(const MqlRates &rates[])
     Print("Rates close: ", rates[0].close);
 
     // Check trading conditions
-    if (momentumSum > 1 && rates[0].close > ma)
+    if (momentumSum > 4 && rates[0].close > ma)
     {
         if (openPositions >= 3)
         {
@@ -140,7 +165,7 @@ void Bot(const MqlRates &rates[])
         else
             Print("Error opening buy position: ", GetLastError());
     }
-    else if (momentumSum < -1 && rates[0].close < ma)
+    else if (momentumSum < -4 && rates[0].close < ma)
     {
         if (openPositions >= 3)
         {
