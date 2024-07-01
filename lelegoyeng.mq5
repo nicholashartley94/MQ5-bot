@@ -11,8 +11,8 @@ input double spreadThreshold = 0.40;
 input double tpFactor = 1;
 input double slFactor = 0.5;
 input int rsiPeriod = 5;      
-input double rsiOverbought = 80; // dari 70 ke 80
-input double rsiOversold = 20;   // dari 30 ke 20
+input double rsiOverbought = 66;
+input double rsiOversold = 36; 
 input int maPeriod = 5; 
 
 datetime lastCloseTime = 0;
@@ -135,7 +135,7 @@ void Bot(const MqlRates &rates[])
     double rsi = CalculateRSI(rsiPeriod);
     double ma = CalculateMA(maPeriod);
     Print("RSI: ", rsi, " MA: ", ma);
-    Print("RSI Oversold: ", rsiOversold, "Rates close: ", rates[0].close);
+    Print("RSI Oversold: ", rsiOversold, "RSI OverBought: ",rsiOverbought, " Rates close: ", rates[0].close);
 
     // Check trading conditions
     if (momentumSum > 1 && rsi < rsiOversold && rates[0].close > ma)
