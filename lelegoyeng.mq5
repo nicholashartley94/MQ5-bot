@@ -135,6 +135,7 @@ void Bot(const MqlRates &rates[])
     double rsi = CalculateRSI(rsiPeriod);
     double ma = CalculateMA(maPeriod);
     Print("RSI: ", rsi, " MA: ", ma);
+    Print("RSI Oversold: ", rsiOversold, "Rates close: ", rates[0].close);
 
     // Check trading conditions
     if (momentumSum > 1 && rsi < rsiOversold && rates[0].close > ma)
