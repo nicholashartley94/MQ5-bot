@@ -99,6 +99,7 @@ double CalculateMA(int period)
 void Bot(const MqlRates &rates[])
 {
     // Check for open positions
+    openPositions = GetOpenPositionsCount("XAUUSD");
     if (PositionSelect("XAUUSD"))
     {
         double currentProfit = PositionGetDouble(POSITION_PROFIT);
@@ -149,7 +150,7 @@ void Bot(const MqlRates &rates[])
     Print("Rates close: ", rates[0].close);
 
     // Check trading conditions
-    if (momentumSum > 4 && rates[0].close > ma)
+    if (momentumSum > 3.5 && rates[0].close > ma)
     {
         if (openPositions >= 3)
         {
@@ -165,7 +166,7 @@ void Bot(const MqlRates &rates[])
         else
             Print("Error opening buy position: ", GetLastError());
     }
-    else if (momentumSum < -4 && rates[0].close < ma)
+    else if (momentumSum < -3.5 && rates[0].close < ma)
     {
         if (openPositions >= 3)
         {
@@ -221,4 +222,15 @@ void HedgePosition()
             }
         }
     }
+}
+
+int GetOpenPositionsCount(string symbol)
+{
+    int count = 0;
+    for (int i = 0; i < PositionsTotal(); i++)
+    {
+        if (PositionSelect(i) && PositionGetString(POSITION_SYMBOL) == symbol)
+            count++;
+    }
+    return count;
 }
