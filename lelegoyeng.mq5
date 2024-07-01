@@ -11,8 +11,8 @@ input double spreadThreshold = 0.40;
 input double tpFactor = 1;
 input double slFactor = 0.5;
 input int rsiPeriod = 5;      
-input double rsiOverbought = 70;
-input double rsiOversold = 30;
+input double rsiOverbought = 80; // dari 70 ke 80
+input double rsiOversold = 20;   // dari 30 ke 20
 input int maPeriod = 5; 
 
 datetime lastCloseTime = 0;
@@ -137,7 +137,7 @@ void Bot(const MqlRates &rates[])
     Print("RSI: ", rsi, " MA: ", ma);
 
     // Check trading conditions
-    if (momentumSum > 3 && rsi < rsiOversold && rates[0].close > ma)
+    if (momentumSum > 1 && rsi < rsiOversold && rates[0].close > ma)
     {
         double tp = bid + (highestHigh - lowestLow);
         double sl = bid - (highestHigh - lowestLow);
@@ -153,7 +153,7 @@ void Bot(const MqlRates &rates[])
         else
             Print("Error opening buy position: ", GetLastError());
     }
-    else if (momentumSum < -3 && rsi > rsiOverbought && rates[0].close < ma)
+    else if (momentumSum < -1 && rsi > rsiOverbought && rates[0].close < ma)
     {
         double tp = ask - (highestHigh - lowestLow);
         double sl = ask + (highestHigh - lowestLow);
