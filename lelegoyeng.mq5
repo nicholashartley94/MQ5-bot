@@ -137,7 +137,7 @@ void Bot(const MqlRates &rates[])
     Print("RSI: ", rsi, " MA: ", ma);
 
     // Check trading conditions
-    if (momentumSum > 5 && rsi < rsiOversold && rates[0].close > ma)
+    if (momentumSum > 3 && rsi < rsiOversold && rates[0].close > ma)
     {
         double tp = bid + (highestHigh - lowestLow);
         double sl = bid - (highestHigh - lowestLow);
@@ -153,7 +153,7 @@ void Bot(const MqlRates &rates[])
         else
             Print("Error opening buy position: ", GetLastError());
     }
-    else if (momentumSum < -5 && rsi > rsiOverbought && rates[0].close < ma)
+    else if (momentumSum < -3 && rsi > rsiOverbought && rates[0].close < ma)
     {
         double tp = ask - (highestHigh - lowestLow);
         double sl = ask + (highestHigh - lowestLow);
