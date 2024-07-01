@@ -10,10 +10,8 @@ input double lotSize = 0.01;
 input double spreadThreshold = 0.40;
 input double tpFactor = 1;
 input double slFactor = 0.5;
-input int rsiPeriod = 5;      
-input double rsiOverbought = 68;
-input double rsiOversold = 32; 
 input int maPeriod = 5; 
+input double hedgeLossThreshold = -2.00;
 
 datetime lastCloseTime = 0;
 datetime lastRunTime = 0;
@@ -55,25 +53,6 @@ double CalculateMomentum(double &data[], int period)
     return data[ArraySize(data)-1] - data[ArraySize(data)-1-period];
 }
 
-double CalculateRSI(int period)
-{
-    double rsi[];
-    int rsiHandle = iRSI("XAUUSD", PERIOD_M1, period, PRICE_CLOSE);
-    if (rsiHandle < 0)
-    {
-        Print("Error creating RSI handle");
-        return 0;
-    }
-    if (CopyBuffer(rsiHandle, 0, 0, 3, rsi) < 0)
-    {
-        Print("Error retrieving RSI data");
-        return 0;
-    }
-    double result = rsi[1];
-    IndicatorRelease(rsiHandle);
-    return result;
-}
-
 double CalculateMA(int period)
 {
     double ma[];
@@ -98,7 +77,16 @@ void Bot(const MqlRates &rates[])
     // Check for open positions
     if (PositionSelect("XAUUSD"))
     {
-        Print("## Posisi Sedang Berjalan ##");
+        double currentProfit = PositionGetDouble(POSITION_PROFIT);
+        Print("## Posisi Sedang Berjalan ## Profit: ", currentProfit);
+
+        // Check for hedging condition
+        if (currentProfit <= hedgeLossThreshold)
+        {
+            Print("## Memasuki Hedging ##");
+            HedgePosition();
+        }
+
         return;
     }
 
@@ -131,14 +119,13 @@ void Bot(const MqlRates &rates[])
     Print("Highest High in Historical Data: ", highestHigh);
     Print("Lowest Low in Historical Data: ", lowestLow);
 
-    // Calculate RSI and MA
-    double rsi = CalculateRSI(rsiPeriod);
+    // Calculate MA
     double ma = CalculateMA(maPeriod);
-    Print("RSI: ", rsi, " MA: ", ma);
-    Print("RSI Oversold: ", rsiOversold, "RSI OverBought: ",rsiOverbought, " Rates close: ", rates[0].close);
+    Print("MA: ", ma);
+    Print("Rates close: ", rates[0].close);
 
     // Check trading conditions
-    if (momentumSum > 1 && rsi < rsiOversold && rates[0].close > ma)
+    if (momentumSum > 1 && rates[0].close > ma)
     {
         double tp = bid + (highestHigh - lowestLow);
         double sl = bid - (highestHigh - lowestLow);
@@ -154,7 +141,7 @@ void Bot(const MqlRates &rates[])
         else
             Print("Error opening buy position: ", GetLastError());
     }
-    else if (momentumSum < -1 && rsi > rsiOverbought && rates[0].close < ma)
+    else if (momentumSum < -1 && rates[0].close < ma)
     {
         double tp = ask - (highestHigh - lowestLow);
         double sl = ask + (highestHigh - lowestLow);
@@ -173,5 +160,39 @@ void Bot(const MqlRates &rates[])
     else
     {
         Print("## Kondisi entri tidak terpenuhi ##");
+    }
+}
+
+void HedgePosition()
+{
+    if (PositionSelect("XAUUSD"))
+    {
+        double positionType = PositionGetInteger(POSITION_TYPE);
+        double volume = PositionGetDouble(POSITION_VOLUME);
+        
+        if (positionType == POSITION_TYPE_BUY)
+        {
+            // Open Sell position
+            if (trade.Sell(volume, "XAUUSD"))
+            {
+                Print("Hedging dengan posisi SELL");
+            }
+            else
+            {
+                Print("Error membuka posisi sell untuk hedging: ", GetLastError());
+            }
+        }
+        else if (positionType == POSITION_TYPE_SELL)
+        {
+            // Open Buy position
+            if (trade.Buy(volume, "XAUUSD"))
+            {
+                Print("Hedging dengan posisi BUY");
+            }
+            else
+            {
+                Print("Error membuka posisi buy untuk hedging: ", GetLastError());
+            }
+        }
     }
 }
