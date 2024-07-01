@@ -151,7 +151,7 @@ void Bot()
     if (momentumSum > 5 && rsi < rsiOversold && rates[0].close > ma)
     {
         double tp = bid + (highestHigh - lowestLow);
-        double sl = ask - (1);
+        double sl = bid - (highestHigh - lowestLow);
         double roundedTP = NormalizeDouble(tp, _Digits);
         double roundedSL = NormalizeDouble(sl, _Digits);
         if (trade.Buy(lotSize, _Symbol))
@@ -167,7 +167,7 @@ void Bot()
     else if (momentumSum < -5 && rsi > rsiOverbought && rates[0].close < ma)
     {
         double tp = ask - (highestHigh - lowestLow);
-        double sl = bid + (1);
+        double sl = ask + (highestHigh - lowestLow);
         double roundedTP = NormalizeDouble(tp, _Digits);
         double roundedSL = NormalizeDouble(sl, _Digits);
         if (trade.Sell(lotSize, _Symbol))
