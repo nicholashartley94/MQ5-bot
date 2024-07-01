@@ -10,12 +10,16 @@
 CTrade trade;
 
 // Define parameters
-input int momentumPeriod = 1;
+input int momentumPeriod = 2;  // Sesuaikan periode momentum
 input int numberOfCandles = 5;
 input double lotSize = 0.01;
 input double spreadThreshold = 0.40;
 input double tpFactor = 1;
 input double slFactor = 0.5;
+input int rsiPeriod = 5;       // Sesuaikan periode RSI
+input double rsiOverbought = 70;
+input double rsiOversold = 30;
+input int maPeriod = 5;        // Sesuaikan periode MA
 
 datetime lastCloseTime = 0;
 datetime lastRunTime = 0;
@@ -35,7 +39,7 @@ void OnTick()
 
     // Retrieve historical candles
     MqlRates rates[];
-    int copied = CopyRates(_Symbol, PERIOD_M5, 0, numberOfCandles, rates);
+    int copied = CopyRates("XAUUSD", PERIOD_M5, 0, numberOfCandles, rates);
     if (copied < numberOfCandles)
     {
         Print("Error retrieving historical data");
@@ -61,20 +65,60 @@ double CalculateMomentum(double &data[], int period)
 }
 
 //+------------------------------------------------------------------+
+//| Calculate RSI                                                    |
+//+------------------------------------------------------------------+
+double CalculateRSI(int period)
+{
+    double rsi[];
+    int rsiHandle = iRSI("XAUUSD", PERIOD_M5, period, PRICE_CLOSE);
+    if (rsiHandle < 0)
+    {
+        Print("Error creating RSI handle");
+        return 0;
+    }
+    if (CopyBuffer(rsiHandle, 0, 0, 3, rsi) < 0)
+    {
+        Print("Error retrieving RSI data");
+        return 0;
+    }
+    return rsi[1];
+}
+
+//+------------------------------------------------------------------+
+//| Calculate Moving Average                                         |
+//+------------------------------------------------------------------+
+double CalculateMA(int period)
+{
+    double ma[];
+    int maHandle = iMA("XAUUSD", PERIOD_M5, period, 0, MODE_SMA, PRICE_CLOSE);
+    if (maHandle < 0)
+    {
+        Print("Error creating MA handle");
+        return 0;
+    }
+    if (CopyBuffer(maHandle, 0, 0, 3, ma) < 0)
+    {
+        Print("Error retrieving MA data");
+        return 0;
+    }
+    return ma[1];
+}
+
+//+------------------------------------------------------------------+
 //| Main Bot Function                                                |
 //+------------------------------------------------------------------+
 void Bot()
 {
     // Check for open positions
-    if (PositionSelect(_Symbol))
+    if (PositionSelect("XAUUSD"))
     {
         Print("## Posisi Sedang Berjalan ##");
         return;
     }
 
     // Retrieve current price
-    double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
-    double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+    double bid = SymbolInfoDouble("XAUUSD", SYMBOL_BID);
+    double ask = SymbolInfoDouble("XAUUSD", SYMBOL_ASK);
     double spread = NormalizeDouble(ask - bid, _Digits);
 
     // Check spread condition
@@ -86,7 +130,7 @@ void Bot()
 
     // Retrieve historical candles
     MqlRates rates[];
-    int copied = CopyRates(_Symbol, PERIOD_M5, 0, numberOfCandles, rates);
+    int copied = CopyRates("XAUUSD", PERIOD_M5, 0, numberOfCandles, rates);
     if (copied < numberOfCandles)
     {
         Print("Error retrieving historical data");
@@ -110,16 +154,21 @@ void Bot()
     Print("Highest High in Historical Data: ", highestHigh);
     Print("Lowest Low in Historical Data: ", lowestLow);
 
+    // Calculate RSI and MA
+    double rsi = CalculateRSI(rsiPeriod);
+    double ma = CalculateMA(maPeriod);
+    Print("RSI: ", rsi, " MA: ", ma);
+
     // Check trading conditions
-    if (momentumSum > 5)
+    if (momentumSum > 5 && rsi < rsiOversold && rates[0].close > ma)
     {
         double tp = bid + (highestHigh - lowestLow);
-        double sl = ask - (1);
+        double sl = bid - (highestHigh - lowestLow);
         double roundedTP = NormalizeDouble(tp, _Digits);
         double roundedSL = NormalizeDouble(sl, _Digits);
-        if (trade.Buy(lotSize, _Symbol))
+        if (trade.Buy(lotSize, "XAUUSD"))
         {
-            trade.PositionModify(_Symbol, roundedSL, roundedTP);
+            trade.PositionModify("XAUUSD", roundedSL, roundedTP);
             Print("Buka posisi BUY");
             Print("TP: ", roundedTP, " SL: ", roundedSL);
             Print("Range High: ", highestHigh, " Range Low: ", lowestLow);
@@ -127,15 +176,15 @@ void Bot()
         else
             Print("Error opening buy position: ", GetLastError());
     }
-    else if (momentumSum < -5)
+    else if (momentumSum < -5 && rsi > rsiOverbought && rates[0].close < ma)
     {
         double tp = ask - (highestHigh - lowestLow);
-        double sl = bid + (1);
+        double sl = ask + (highestHigh - lowestLow);
         double roundedTP = NormalizeDouble(tp, _Digits);
         double roundedSL = NormalizeDouble(sl, _Digits);
-        if (trade.Sell(lotSize, _Symbol))
+        if (trade.Sell(lotSize, "XAUUSD"))
         {
-            trade.PositionModify(_Symbol, roundedSL, roundedTP);
+            trade.PositionModify("XAUUSD", roundedSL, roundedTP);
             Print("Buka posisi SELL");
             Print("TP: ", roundedTP, " SL: ", roundedSL);
             Print("Range High: ", highestHigh, " Range Low: ", lowestLow);
