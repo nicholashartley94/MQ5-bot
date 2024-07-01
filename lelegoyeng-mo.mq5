@@ -45,9 +45,6 @@ void OnTick()
     }
 }
 
-//+------------------------------------------------------------------+
-//| Calculate Momentum                                               |
-//+------------------------------------------------------------------+
 double CalculateMomentum(double &data[], int period)
 {
     if (ArraySize(data) < period)
@@ -55,9 +52,27 @@ double CalculateMomentum(double &data[], int period)
     return data[ArraySize(data)-1] - data[ArraySize(data)-1-period];
 }
 
-//+------------------------------------------------------------------+
-//| Main Bot Function                                                |
-//+------------------------------------------------------------------+
+bool CheckCandlePatterns(MqlRates &rates[])
+{
+    // Misalnya pola candle sederhana seperti bullish engulfing atau bearish engulfing
+    int lastCandleIndex = ArraySize(rates) - 1;
+    int prevCandleIndex = lastCandleIndex - 1;
+
+    // Bullish engulfing pattern
+    bool bullishEngulfing = (rates[prevCandleIndex].close < rates[prevCandleIndex].open) && 
+                            (rates[lastCandleIndex].close > rates[lastCandleIndex].open) && 
+                            (rates[lastCandleIndex].close > rates[prevCandleIndex].open) && 
+                            (rates[lastCandleIndex].open < rates[prevCandleIndex].close);
+
+    // Bearish engulfing pattern
+    bool bearishEngulfing = (rates[prevCandleIndex].close > rates[prevCandleIndex].open) && 
+                            (rates[lastCandleIndex].close < rates[lastCandleIndex].open) && 
+                            (rates[lastCandleIndex].close < rates[prevCandleIndex].open) && 
+                            (rates[lastCandleIndex].open > rates[prevCandleIndex].close);
+
+    return bullishEngulfing || bearishEngulfing;
+}
+
 void Bot()
 {
     // Check for open positions
@@ -105,8 +120,16 @@ void Bot()
     Print("Highest High in Historical Data: ", highestHigh);
     Print("Lowest Low in Historical Data: ", lowestLow);
 
+    // Check candle patterns
+    bool validCandlePattern = CheckCandlePatterns(rates);
+    if (!validCandlePattern)
+    {
+        Print("## Pola candle tidak valid ##");
+        return;
+    }
+
     // Check trading conditions
-    if (momentumSum > 5)
+    if (momentumSum > 3)
     {
         double tp = bid + (highestHigh - lowestLow);
         double sl = ask - (1);
@@ -122,7 +145,7 @@ void Bot()
         else
             Print("Error opening buy position: ", GetLastError());
     }
-    else if (momentumSum < -5)
+    else if (momentumSum < -3)
     {
         double tp = ask - (highestHigh - lowestLow);
         double sl = bid + (1);
