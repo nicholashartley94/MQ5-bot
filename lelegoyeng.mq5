@@ -44,7 +44,7 @@ void OnTick()
     if (rates[0].time != lastCloseTime)
     {
         lastCloseTime = rates[0].time;
-        Bot();
+        Bot(rates);
     }
 }
 
@@ -69,7 +69,9 @@ double CalculateRSI(int period)
         Print("Error retrieving RSI data");
         return 0;
     }
-    return rsi[1];
+    double result = rsi[1];
+    IndicatorRelease(rsiHandle);
+    return result;
 }
 
 double CalculateMA(int period)
@@ -86,10 +88,12 @@ double CalculateMA(int period)
         Print("Error retrieving MA data");
         return 0;
     }
-    return ma[1];
+    double result = ma[1];
+    IndicatorRelease(maHandle);
+    return result;
 }
 
-void Bot()
+void Bot(const MqlRates &rates[])
 {
     // Check for open positions
     if (PositionSelect("XAUUSD"))
@@ -110,20 +114,11 @@ void Bot()
         return;
     }
 
-    // Retrieve historical candles
-    MqlRates rates[];
-    int copied = CopyRates("XAUUSD", PERIOD_M5, 0, numberOfCandles, rates);
-    if (copied < numberOfCandles)
-    {
-        Print("Error retrieving historical data");
-        return;
-    }
-
     // Calculate momentum
     double momentumSum = 0;
     double highestHigh = 0;
     double lowestLow = 999999;
-    for (int i = momentumPeriod; i < copied; i++)
+    for (int i = momentumPeriod; i < numberOfCandles; i++)
     {
         momentumSum += rates[i].close - rates[i-momentumPeriod].close;
         if (rates[i].high > highestHigh)
