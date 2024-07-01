@@ -26,14 +26,14 @@ int OnInit()
 void OnTick()
 {
     datetime now = TimeCurrent();
-    if (now - lastRunTime < PeriodSeconds(PERIOD_M5))
+    if (now - lastRunTime < PeriodSeconds(PERIOD_M1))
         return; 
 
     lastRunTime = now;
 
     // Retrieve historical candles
     MqlRates rates[];
-    int copied = CopyRates("XAUUSD", PERIOD_M5, 0, numberOfCandles, rates);
+    int copied = CopyRates("XAUUSD", PERIOD_M1, 0, numberOfCandles, rates);
     if (copied < numberOfCandles)
     {
         Print("Error retrieving historical data");
@@ -58,7 +58,7 @@ double CalculateMomentum(double &data[], int period)
 double CalculateRSI(int period)
 {
     double rsi[];
-    int rsiHandle = iRSI("XAUUSD", PERIOD_M5, period, PRICE_CLOSE);
+    int rsiHandle = iRSI("XAUUSD", PERIOD_M1, period, PRICE_CLOSE);
     if (rsiHandle < 0)
     {
         Print("Error creating RSI handle");
@@ -77,7 +77,7 @@ double CalculateRSI(int period)
 double CalculateMA(int period)
 {
     double ma[];
-    int maHandle = iMA("XAUUSD", PERIOD_M5, period, 0, MODE_SMA, PRICE_CLOSE);
+    int maHandle = iMA("XAUUSD", PERIOD_M1, period, 0, MODE_SMA, PRICE_CLOSE);
     if (maHandle < 0)
     {
         Print("Error creating MA handle");
