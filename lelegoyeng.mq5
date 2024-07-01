@@ -1,25 +1,19 @@
-//+------------------------------------------------------------------+
-//|                                                      myBot.mq5   |
-//|                                  Copyright 2024, MetaQuotes Ltd. |
-//|                                             https://www.mql5.com |
-//+------------------------------------------------------------------+
 #property copyright "Copyright 2024, MetaQuotes Ltd."
 #property link      "https://www.mql5.com"
 #property version   "1.00"
 #include <Trade\Trade.mqh>
 CTrade trade;
 
-// Define parameters
-input int momentumPeriod = 2;  // Sesuaikan periode momentum
+input int momentumPeriod = 2; 
 input int numberOfCandles = 5;
 input double lotSize = 0.01;
 input double spreadThreshold = 0.40;
 input double tpFactor = 1;
 input double slFactor = 0.5;
-input int rsiPeriod = 5;       // Sesuaikan periode RSI
+input int rsiPeriod = 5;      
 input double rsiOverbought = 70;
 input double rsiOversold = 30;
-input int maPeriod = 5;        // Sesuaikan periode MA
+input int maPeriod = 5; 
 
 datetime lastCloseTime = 0;
 datetime lastRunTime = 0;
@@ -33,7 +27,7 @@ void OnTick()
 {
     datetime now = TimeCurrent();
     if (now - lastRunTime < PeriodSeconds(PERIOD_M5))
-        return;  // Skip if less than 5 minutes since last run
+        return; 
 
     lastRunTime = now;
 
@@ -54,9 +48,6 @@ void OnTick()
     }
 }
 
-//+------------------------------------------------------------------+
-//| Calculate Momentum                                               |
-//+------------------------------------------------------------------+
 double CalculateMomentum(double &data[], int period)
 {
     if (ArraySize(data) < period)
@@ -64,9 +55,6 @@ double CalculateMomentum(double &data[], int period)
     return data[ArraySize(data)-1] - data[ArraySize(data)-1-period];
 }
 
-//+------------------------------------------------------------------+
-//| Calculate RSI                                                    |
-//+------------------------------------------------------------------+
 double CalculateRSI(int period)
 {
     double rsi[];
@@ -84,9 +72,6 @@ double CalculateRSI(int period)
     return rsi[1];
 }
 
-//+------------------------------------------------------------------+
-//| Calculate Moving Average                                         |
-//+------------------------------------------------------------------+
 double CalculateMA(int period)
 {
     double ma[];
@@ -104,9 +89,6 @@ double CalculateMA(int period)
     return ma[1];
 }
 
-//+------------------------------------------------------------------+
-//| Main Bot Function                                                |
-//+------------------------------------------------------------------+
 void Bot()
 {
     // Check for open positions
