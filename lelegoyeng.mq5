@@ -11,8 +11,8 @@ input double spreadThreshold = 0.40;
 input double tpFactor = 1;
 input double slFactor = 0.5;
 input int rsiPeriod = 5;      
-input double rsiOverbought = 66;
-input double rsiOversold = 36; 
+input double rsiOverbought = 68;
+input double rsiOversold = 32; 
 input int maPeriod = 5; 
 
 datetime lastCloseTime = 0;
