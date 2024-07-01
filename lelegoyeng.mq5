@@ -8,13 +8,12 @@ input int momentumPeriod = 2;
 input int numberOfCandles = 5;
 input double lotSize = 0.01;
 input double spreadThreshold = 0.40;
-input double tpFactor = 1;
-input double slFactor = 0.5;
 input int maPeriod = 5; 
 input double hedgeLossThreshold = -2.00;
 
 datetime lastCloseTime = 0;
 datetime lastRunTime = 0;
+int openPositions = 0; // Variabel untuk melacak jumlah posisi terbuka
 
 int OnInit()
 {
@@ -127,32 +126,32 @@ void Bot(const MqlRates &rates[])
     // Check trading conditions
     if (momentumSum > 1 && rates[0].close > ma)
     {
-        double tp = bid + (highestHigh - lowestLow);
-        double sl = bid - (highestHigh - lowestLow);
-        double roundedTP = NormalizeDouble(tp, _Digits);
-        double roundedSL = NormalizeDouble(sl, _Digits);
+        if (openPositions >= 3)
+        {
+            Print("## Mencapai batas maksimum posisi terbuka ##");
+            return;
+        }
+
         if (trade.Buy(lotSize, "XAUUSD"))
         {
-            trade.PositionModify("XAUUSD", roundedSL, roundedTP);
+            openPositions++; // Tambah posisi terbuka
             Print("Buka posisi BUY");
-            Print("TP: ", roundedTP, " SL: ", roundedSL);
-            Print("Range High: ", highestHigh, " Range Low: ", lowestLow);
         }
         else
             Print("Error opening buy position: ", GetLastError());
     }
     else if (momentumSum < -1 && rates[0].close < ma)
     {
-        double tp = ask - (highestHigh - lowestLow);
-        double sl = ask + (highestHigh - lowestLow);
-        double roundedTP = NormalizeDouble(tp, _Digits);
-        double roundedSL = NormalizeDouble(sl, _Digits);
+        if (openPositions >= 3)
+        {
+            Print("## Mencapai batas maksimum posisi terbuka ##");
+            return;
+        }
+
         if (trade.Sell(lotSize, "XAUUSD"))
         {
-            trade.PositionModify("XAUUSD", roundedSL, roundedTP);
+            openPositions++; // Tambah posisi terbuka
             Print("Buka posisi SELL");
-            Print("TP: ", roundedTP, " SL: ", roundedSL);
-            Print("Range High: ", highestHigh, " Range Low: ", lowestLow);
         }
         else
             Print("Error opening sell position: ", GetLastError());
@@ -175,6 +174,7 @@ void HedgePosition()
             // Open Sell position
             if (trade.Sell(volume, "XAUUSD"))
             {
+                openPositions--; // Kurangi posisi terbuka setelah hedging
                 Print("Hedging dengan posisi SELL");
             }
             else
@@ -187,6 +187,7 @@ void HedgePosition()
             // Open Buy position
             if (trade.Buy(volume, "XAUUSD"))
             {
+                openPositions--; // Kurangi posisi terbuka setelah hedging
                 Print("Hedging dengan posisi BUY");
             }
             else
