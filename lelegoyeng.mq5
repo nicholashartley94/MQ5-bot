@@ -14,6 +14,7 @@ input double hedgeLossThreshold = -1.5;
 
 datetime lastCloseTime = 0;
 datetime lastRunTime = 0;
+int hedgeCount = 0;  // Variabel untuk melacak jumlah posisi hedging
 
 int OnInit()
 {
@@ -37,7 +38,7 @@ void OnTick()
         return;
     }
 
-    // Check if a new 5-minute candle has closed
+    // Check if a new 1-minute candle has closed
     if (rates[0].time != lastCloseTime)
     {
         lastCloseTime = rates[0].time;
@@ -85,6 +86,7 @@ void Bot(const MqlRates &rates[])
             if (trade.PositionClose("XAUUSD"))
             {
                 Print("Posisi ditutup karena profit lebih dari 1.5");
+                hedgeCount = 0;  // Reset hedge count setelah posisi ditutup dengan profit
             }
             else
             {
@@ -140,6 +142,7 @@ void Bot(const MqlRates &rates[])
         if (trade.Buy(lotSize, "XAUUSD"))
         {
             Print("Buka posisi BUY");
+            hedgeCount = 0;  // Reset hedge count setelah posisi baru dibuka
             Print("Range High: ", highestHigh, " Range Low: ", lowestLow);
         }
         else
@@ -150,6 +153,7 @@ void Bot(const MqlRates &rates[])
         if (trade.Sell(lotSize, "XAUUSD"))
         {
             Print("Buka posisi SELL");
+            hedgeCount = 0;  // Reset hedge count setelah posisi baru dibuka
             Print("Range High: ", highestHigh, " Range Low: ", lowestLow);
         }
         else
@@ -163,6 +167,12 @@ void Bot(const MqlRates &rates[])
 
 void HedgePosition()
 {
+    if (hedgeCount >= 2)
+    {
+        Print("## Batas Hedging Tercapai ##");
+        return;
+    }
+
     if (PositionSelect("XAUUSD"))
     {
         double positionType = PositionGetInteger(POSITION_TYPE);
@@ -174,6 +184,7 @@ void HedgePosition()
             if (trade.Sell(volume, "XAUUSD"))
             {
                 Print("Hedging dengan posisi SELL");
+                hedgeCount++;
             }
             else
             {
@@ -186,6 +197,7 @@ void HedgePosition()
             if (trade.Buy(volume, "XAUUSD"))
             {
                 Print("Hedging dengan posisi BUY");
+                hedgeCount++;
             }
             else
             {
