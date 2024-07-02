@@ -7,14 +7,12 @@ CTrade trade;
 input int momentumPeriod = 2; 
 input int numberOfCandles = 5;
 input double lotSize = 0.01;
-input double spreadThreshold = 0.40;
+input double spreadThreshold = 0.35;
 input int maPeriod = 5; 
-input double hedgeLossThreshold = -1.20;
-input double totalProfitThreshold = 2.00; // New input for total profit threshold
+input double hedgeLossThreshold = -1.5;
 
 datetime lastCloseTime = 0;
 datetime lastRunTime = 0;
-int openPositions = 0; // Variabel untuk melacak jumlah posisi terbuka
 
 int OnInit()
 {
@@ -43,30 +41,6 @@ void OnTick()
     {
         lastCloseTime = rates[0].time;
         Bot(rates);
-    }
-
-    // Check and close positions one by one
-    CheckAndClosePositions();
-}
-
-void CheckAndClosePositions()
-{
-    for (int i = PositionsTotal() - 1; i >= 0; i--)
-    {
-        if (PositionSelect(i))
-        {
-            string symbol = PositionGetString(POSITION_SYMBOL);
-            double profit = PositionGetDouble(POSITION_PROFIT);
-            
-            // Close position if profit meets threshold
-            if (profit >= totalProfitThreshold)
-            {
-                ulong ticket = PositionGetInteger(POSITION_TICKET);
-                Print("## Menutup posisi ", ticket, " karena profit mencapai ", totalProfitThreshold);
-                trade.PositionClose(ticket);
-                openPositions--; // Kurangi jumlah posisi terbuka
-            }
-        }
     }
 }
 
@@ -99,7 +73,6 @@ double CalculateMA(int period)
 void Bot(const MqlRates &rates[])
 {
     // Check for open positions
-    openPositions = GetOpenPositionsCount("XAUUSD");
     if (PositionSelect("XAUUSD"))
     {
         double currentProfit = PositionGetDouble(POSITION_PROFIT);
@@ -152,32 +125,20 @@ void Bot(const MqlRates &rates[])
     // Check trading conditions
     if (momentumSum > 1 && rates[0].close > ma)
     {
-        if (openPositions >= 3)
-        {
-            Print("## Mencapai batas maksimum posisi terbuka ##");
-            return;
-        }
-
         if (trade.Buy(lotSize, "XAUUSD"))
         {
-            openPositions++; // Tambah posisi terbuka
             Print("Buka posisi BUY");
+            Print("Range High: ", highestHigh, " Range Low: ", lowestLow);
         }
         else
             Print("Error opening buy position: ", GetLastError());
     }
     else if (momentumSum < -1 && rates[0].close < ma)
     {
-        if (openPositions >= 3)
-        {
-            Print("## Mencapai batas maksimum posisi terbuka ##");
-            return;
-        }
-
         if (trade.Sell(lotSize, "XAUUSD"))
         {
-            openPositions++; // Tambah posisi terbuka
             Print("Buka posisi SELL");
+            Print("Range High: ", highestHigh, " Range Low: ", lowestLow);
         }
         else
             Print("Error opening sell position: ", GetLastError());
@@ -200,7 +161,6 @@ void HedgePosition()
             // Open Sell position
             if (trade.Sell(volume, "XAUUSD"))
             {
-                openPositions--; // Kurangi posisi terbuka setelah hedging
                 Print("Hedging dengan posisi SELL");
             }
             else
@@ -213,7 +173,6 @@ void HedgePosition()
             // Open Buy position
             if (trade.Buy(volume, "XAUUSD"))
             {
-                openPositions--; // Kurangi posisi terbuka setelah hedging
                 Print("Hedging dengan posisi BUY");
             }
             else
@@ -222,15 +181,4 @@ void HedgePosition()
             }
         }
     }
-}
-
-int GetOpenPositionsCount(string symbol)
-{
-    int count = 0;
-    for (int i = 0; i < PositionsTotal(); i++)
-    {
-        if (PositionSelect(i) && PositionGetString(POSITION_SYMBOL) == symbol)
-            count++;
-    }
-    return count;
 }
