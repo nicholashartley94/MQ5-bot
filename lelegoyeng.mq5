@@ -167,7 +167,7 @@ void Bot(const MqlRates &rates[])
 
 void HedgePosition()
 {
-    if (hedgeCount >= 2)
+    if (hedgeCount >= 1)
     {
         Print("## Batas Hedging Tercapai ##");
         return;
@@ -177,13 +177,14 @@ void HedgePosition()
     {
         double positionType = PositionGetInteger(POSITION_TYPE);
         double volume = PositionGetDouble(POSITION_VOLUME);
-        
+        double hedgeVolume = volume * 2;  // Dua kali lipat lot size
+
         if (positionType == POSITION_TYPE_BUY)
         {
             // Open Sell position
-            if (trade.Sell(volume, "XAUUSD"))
+            if (trade.Sell(hedgeVolume, "XAUUSD"))
             {
-                Print("Hedging dengan posisi SELL");
+                Print("Hedging dengan posisi SELL dengan volume ", hedgeVolume);
                 hedgeCount++;
             }
             else
@@ -194,9 +195,9 @@ void HedgePosition()
         else if (positionType == POSITION_TYPE_SELL)
         {
             // Open Buy position
-            if (trade.Buy(volume, "XAUUSD"))
+            if (trade.Buy(hedgeVolume, "XAUUSD"))
             {
-                Print("Hedging dengan posisi BUY");
+                Print("Hedging dengan posisi BUY dengan volume ", hedgeVolume);
                 hedgeCount++;
             }
             else
