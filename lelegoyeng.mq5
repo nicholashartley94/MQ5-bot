@@ -1,6 +1,7 @@
 #property copyright "Copyright 2024, MetaQuotes Ltd."
 #property link      "https://www.mql5.com"
 #property version   "1.00"
+
 #include <Trade\Trade.mqh>
 CTrade trade;
 
@@ -78,8 +79,19 @@ void Bot(const MqlRates &rates[])
         double currentProfit = PositionGetDouble(POSITION_PROFIT);
         Print("## Posisi Sedang Berjalan ## Profit: ", currentProfit);
 
-        // Check for hedging condition
-        if (currentProfit <= hedgeLossThreshold)
+        // Check for profit close condition
+        if (currentProfit >= 1.5)
+        {
+            if (PositionClose("XAUUSD"))
+            {
+                Print("Posisi ditutup karena profit lebih dari 1.5");
+            }
+            else
+            {
+                Print("Error menutup posisi: ", GetLastError());
+            }
+        }
+        else if (currentProfit <= hedgeLossThreshold)
         {
             Print("## Memasuki Hedging ##");
             HedgePosition();
