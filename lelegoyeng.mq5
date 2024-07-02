@@ -82,7 +82,7 @@ void Bot(const MqlRates &rates[])
         // Check for profit close condition
         if (currentProfit >= 1.5)
         {
-            if (PositionClose("XAUUSD"))
+            if (trade.PositionClose("XAUUSD"))
             {
                 Print("Posisi ditutup karena profit lebih dari 1.5");
             }
