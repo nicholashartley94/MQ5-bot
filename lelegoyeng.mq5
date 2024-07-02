@@ -150,7 +150,7 @@ void Bot(const MqlRates &rates[])
     Print("Rates close: ", rates[0].close);
 
     // Check trading conditions
-    if (momentumSum > 3.5 && rates[0].close > ma)
+    if (momentumSum > 1 && rates[0].close > ma)
     {
         if (openPositions >= 3)
         {
@@ -166,7 +166,7 @@ void Bot(const MqlRates &rates[])
         else
             Print("Error opening buy position: ", GetLastError());
     }
-    else if (momentumSum < -3.5 && rates[0].close < ma)
+    else if (momentumSum < -1 && rates[0].close < ma)
     {
         if (openPositions >= 3)
         {
