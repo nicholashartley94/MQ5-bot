@@ -195,8 +195,7 @@ void HedgePosition()
     if (PositionSelect("XAUUSD"))
     {
         double positionType = PositionGetInteger(POSITION_TYPE);
-        double volume = PositionGetDouble(POSITION_VOLUME);
-        double hedgeVolume = volume * 2;
+        double hedgeVolume = 0.02;
 
         if (positionType == POSITION_TYPE_BUY)
         {
