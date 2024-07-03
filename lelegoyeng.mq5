@@ -158,6 +158,11 @@ void Bot(const MqlRates &rates[])
 
     if (momentumSum > 1 && rates[0].close > ma)
     {
+        if (PositionSelect("XAUUSD"))
+        {
+            Print("## Posisi sudah terbuka, tidak membuka posisi baru ##");
+            return;
+        }
         if (trade.Buy(lotSize, "XAUUSD"))
         {
             Print("Buka posisi BUY");
@@ -165,10 +170,17 @@ void Bot(const MqlRates &rates[])
             Print("Range High: ", highestHigh, " Range Low: ", lowestLow);
         }
         else
+        {
             Print("Error opening buy position: ", GetLastError());
+        }
     }
     else if (momentumSum < -1 && rates[0].close < ma)
     {
+        if (PositionSelect("XAUUSD"))
+        {
+            Print("## Posisi sudah terbuka, tidak membuka posisi baru ##");
+            return;
+        }
         if (trade.Sell(lotSize, "XAUUSD"))
         {
             Print("Buka posisi SELL");
@@ -176,7 +188,9 @@ void Bot(const MqlRates &rates[])
             Print("Range High: ", highestHigh, " Range Low: ", lowestLow);
         }
         else
+        {
             Print("Error opening sell position: ", GetLastError());
+        }
     }
     else
     {
