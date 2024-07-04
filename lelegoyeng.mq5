@@ -105,7 +105,7 @@ void Bot(const MqlRates &rates[])
         double currentProfit = PositionGetDouble(POSITION_PROFIT);
         Print("## Posisi Sedang Berjalan ## Profit: ", currentProfit);
 
-        if (currentProfit >= 1.5)
+        if (currentProfit >= 1.5 && hedgeCount == 0)
         {
             if (trade.PositionClose("XAUUSD"))
             {
@@ -149,8 +149,6 @@ void Bot(const MqlRates &rates[])
     }
 
     Print("Sum of Momentum Oscillator Values: ", momentumSum);
-    Print("Highest High in Historical Data: ", highestHigh);
-    Print("Lowest Low in Historical Data: ", lowestLow);
 
     double ma = CalculateMA(maPeriod);
     Print("MA: ", ma);
