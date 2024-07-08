@@ -40,7 +40,7 @@ void OnTick()
     }
     Print("Total profit from all open positions: ", totalProfit);
 
-    if (totalProfit >= 2.00)
+    if (totalProfit >= 2.00 || totalProfit <= -5.00)
     {
         for (int i = 0; i < totalPositions; i++)
         {
