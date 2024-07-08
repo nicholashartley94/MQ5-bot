@@ -8,7 +8,7 @@ CTrade trade;
 input int momentumPeriod = 2; 
 input int numberOfCandles = 5;
 input double lotSize = 0.01;
-input double spreadThreshold = 0.33;
+input double spreadThreshold = 0.35;
 input int maPeriod = 5; 
 input double hedgeLossThreshold = -1.5;
 
