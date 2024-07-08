@@ -10,7 +10,7 @@ input int numberOfCandles = 5;
 input double lotSize = 0.01;
 input double spreadThreshold = 0.00014;
 input int maPeriod = 5; 
-input double hedgeLossThreshold = -0.75;
+input double hedgeLossThreshold = -1.5;
 
 datetime lastCloseTime = 0;
 datetime lastRunTime = 0;
@@ -40,7 +40,7 @@ void OnTick()
     }
     Print("Total profit from all open positions: ", totalProfit);
 
-    if (totalProfit >= 0.75)
+    if (totalProfit >= 2.00)
     {
         for (int i = 0; i < totalPositions; i++)
         {
@@ -53,7 +53,7 @@ void OnTick()
                 }
             }
         }
-        Print("All positions closed due to total profit reaching or exceeding 0.75");
+        Print("All positions closed due to total profit reaching or exceeding 2.00");
         return;
     }
 
@@ -105,11 +105,11 @@ void Bot(const MqlRates &rates[])
         double currentProfit = PositionGetDouble(POSITION_PROFIT);
         Print("## Posisi Sedang Berjalan ## Profit: ", currentProfit);
 
-        if (currentProfit >= 0.75 && hedgeCount == 0)
+        if (currentProfit >= 1.5 && hedgeCount == 0)
         {
             if (trade.PositionClose("EURUSD"))
             {
-                Print("Posisi ditutup karena profit lebih dari 0.75");
+                Print("Posisi ditutup karena profit lebih dari 1.5");
                 hedgeCount = 0;
             }
             else
