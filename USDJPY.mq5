@@ -8,7 +8,7 @@ CTrade trade;
 input int momentumPeriod = 2; 
 input int numberOfCandles = 5;
 input double lotSize = 0.01;
-input double spreadThreshold = 0.00014;
+input double spreadThreshold = 0.014;
 input int maPeriod = 5; 
 input double hedgeLossThreshold = -0.75;
 
@@ -129,6 +129,8 @@ void Bot(const MqlRates &rates[])
     double bid = SymbolInfoDouble("USDJPY", SYMBOL_BID);
     double ask = SymbolInfoDouble("USDJPY", SYMBOL_ASK);
     double spread = NormalizeDouble(ask - bid, _Digits);
+    
+    Print("Spread :",spread);
 
     if (spread > spreadThreshold)
     {
