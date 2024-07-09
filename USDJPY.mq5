@@ -40,7 +40,7 @@ void OnTick()
     }
     Print("Total profit from all open positions: ", totalProfit);
 
-    if (totalProfit >= 1.00 || totalProfit <= -3.00)
+    if (totalProfit >= 0.75 || totalProfit <= -3.00)
     {
         for (int i = 0; i < totalPositions; i++)
         {
@@ -53,7 +53,7 @@ void OnTick()
                 }
             }
         }
-        Print("All positions closed due to total profit reaching or exceeding 1.00");
+        Print("All positions closed due to total profit reaching or exceeding 0.75");
         return;
     }
 
