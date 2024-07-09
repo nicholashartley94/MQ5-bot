@@ -10,7 +10,7 @@ input int numberOfCandles = 5;
 input double lotSize = 0.01;
 input double spreadThreshold = 0.014;
 input int maPeriod = 5; 
-input double hedgeLossThreshold = -0.75;
+input double hedgeLossThreshold = -0.50;
 
 datetime lastCloseTime = 0;
 datetime lastRunTime = 0;
@@ -40,16 +40,19 @@ void OnTick()
     }
     Print("Total profit from all open positions: ", totalProfit);
 
-    if (totalProfit >= 0.75 || totalProfit <= -3.00)
+    if (totalProfit >= 0.75 || totalProfit <= -2.00)
     {
         for (int i = 0; i < totalPositions; i++)
         {
             ulong ticket = PositionGetTicket(i);
             if (ticket != 0)
             {
+              string symbol = PositionGetString(POSITION_SYMBOL);
+               if (symbol == "USDJPY"){
                 if (!trade.PositionClose(ticket))
                 {
                     Print("Error closing position ", ticket, ": ", GetLastError());
+                }
                 }
             }
         }
