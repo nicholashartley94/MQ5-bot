@@ -154,7 +154,7 @@ void Bot(const MqlRates &rates[])
     Print("MA: ", ma);
     Print("Rates close: ", rates[0].close);
 
-    if (momentumSum > 1 && rates[0].close > ma)
+    if (momentumSum > 0 && rates[0].close > ma)
     {
         if (PositionSelect("XAUUSD"))
         {
@@ -172,7 +172,7 @@ void Bot(const MqlRates &rates[])
             Print("Error opening buy position: ", GetLastError());
         }
     }
-    else if (momentumSum < -1 && rates[0].close < ma)
+    else if (momentumSum < -0 && rates[0].close < ma)
     {
         if (PositionSelect("XAUUSD"))
         {
