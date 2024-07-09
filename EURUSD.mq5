@@ -40,7 +40,7 @@ void OnTick()
     }
     Print("Total profit from all open positions: ", totalProfit);
 
-    if (totalProfit >= 0.75 || totalProfit <= -2.00)
+    if (totalProfit >= 0.75 || totalProfit <= -3.00)
     {
         for (int i = 0; i < totalPositions; i++)
         {
@@ -212,7 +212,7 @@ void HedgePosition()
     if (PositionSelect("EURUSD"))
     {
         double positionType = PositionGetInteger(POSITION_TYPE);
-        double hedgeVolume = 0.02;
+        double hedgeVolume = 0.03;
 
         if (positionType == POSITION_TYPE_BUY)
         {
