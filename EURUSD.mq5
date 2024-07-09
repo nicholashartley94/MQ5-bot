@@ -109,7 +109,7 @@ void Bot(const MqlRates &rates[])
         {
             if (trade.PositionClose("EURUSD"))
             {
-                Print("Posisi ditutup karena profit lebih dari 1.5");
+                Print("Posisi ditutup karena profit lebih dari 0.75");
                 hedgeCount = 0;
             }
             else
