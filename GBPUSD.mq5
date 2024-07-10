@@ -39,8 +39,8 @@ void OnTick()
         }
     }
     Print("Total profit from all open positions: ", totalProfit);
-
-    if (totalProfit >= 0.75 || totalProfit <= -3.00)
+if(hedgeCount > 0){
+    if (totalProfit >= 0 || totalProfit <= -3.00)
     {
         for (int i = 0; i < totalPositions; i++)
         {
@@ -59,7 +59,7 @@ void OnTick()
         Print("All positions closed due to total profit reaching or exceeding 0.75");
         return;
     }
-
+}
     MqlRates rates[];
     int copied = CopyRates("GBPUSD", PERIOD_M1, 0, numberOfCandles, rates);
     if (copied < numberOfCandles)
@@ -212,7 +212,7 @@ void HedgePosition()
     if (PositionSelect("GBPUSD"))
     {
         double positionType = PositionGetInteger(POSITION_TYPE);
-        double hedgeVolume = 0.03;
+        double hedgeVolume = 0.02;
 
         if (positionType == POSITION_TYPE_BUY)
         {
