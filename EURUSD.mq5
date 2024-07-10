@@ -39,27 +39,28 @@ void OnTick()
         }
     }
     Print("Total profit from all open positions: ", totalProfit);
-
-    if (totalProfit >= 0.75 || totalProfit <= -3.00)
+if(hedgeCount > 0){
+    if (totalProfit >= 0 || totalProfit <= -3.00)
     {
         for (int i = 0; i < totalPositions; i++)
         {
             ulong ticket = PositionGetTicket(i);
             if (ticket != 0)
             {
-              string symbol = PositionGetString(POSITION_SYMBOL);
-              if (symbol == "EURUSD"){
-                if (!trade.PositionClose(ticket))
+                string symbol = PositionGetString(POSITION_SYMBOL);
+                if (symbol == "EURUSD")
                 {
-                    Print("Error closing position ", ticket, ": ", GetLastError());
-                }
+                    if (!trade.PositionClose(ticket))
+                    {
+                        Print("Error closing position ", ticket, ": ", GetLastError());
+                    }
                 }
             }
         }
         Print("All positions closed due to total profit reaching or exceeding 0.75");
         return;
     }
-
+}
     MqlRates rates[];
     int copied = CopyRates("EURUSD", PERIOD_M1, 0, numberOfCandles, rates);
     if (copied < numberOfCandles)
@@ -212,7 +213,7 @@ void HedgePosition()
     if (PositionSelect("EURUSD"))
     {
         double positionType = PositionGetInteger(POSITION_TYPE);
-        double hedgeVolume = 0.03;
+        double hedgeVolume = 0.02;
 
         if (positionType == POSITION_TYPE_BUY)
         {
