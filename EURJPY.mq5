@@ -8,9 +8,9 @@ CTrade trade;
 input int momentumPeriod = 2; 
 input int numberOfCandles = 5;
 input double lotSize = 0.01;
-input double spreadThreshold = 0.018;
+input double spreadThreshold = 0.021;
 input int maPeriod = 5; 
-input double hedgeLossThreshold = -0.75;
+input double hedgeLossThreshold = -0.50;
 
 datetime lastCloseTime = 0;
 datetime lastRunTime = 0;
@@ -39,24 +39,27 @@ void OnTick()
         }
     }
     Print("Total profit from all open positions: ", totalProfit);
-
-    if (totalProfit >= 0.75)
+if(hedgeCount > 0){
+    if (totalProfit >= 0 || totalProfit <= -3.00)
     {
         for (int i = 0; i < totalPositions; i++)
         {
             ulong ticket = PositionGetTicket(i);
             if (ticket != 0)
             {
+              string symbol = PositionGetString(POSITION_SYMBOL);
+              if (symbol == "EURJPY"){
                 if (!trade.PositionClose(ticket))
                 {
                     Print("Error closing position ", ticket, ": ", GetLastError());
+                }
                 }
             }
         }
         Print("All positions closed due to total profit reaching or exceeding 0.75");
         return;
     }
-
+}
     MqlRates rates[];
     int copied = CopyRates("EURJPY", PERIOD_M1, 0, numberOfCandles, rates);
     if (copied < numberOfCandles)
