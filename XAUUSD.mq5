@@ -10,7 +10,7 @@ input int numberOfCandles = 5;
 input double lotSize = 0.01;
 input double spreadThreshold = 0.35;
 input int maPeriod = 5; 
-input double hedgeLossThreshold = -0.50;
+input double hedgeLossThreshold = -1.50;
 
 datetime lastCloseTime = 0;
 datetime lastRunTime = 0;
