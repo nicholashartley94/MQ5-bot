@@ -40,7 +40,7 @@ void OnTick()
     }
     Print("Total profit from all open positions: ", totalProfit);
 if(hedgeCount > 0){
-    if (totalProfit >= 0 || totalProfit <= -3.00)
+    if (totalProfit >= 2 || totalProfit <= -3.00)
     {
         for (int i = 0; i < totalPositions; i++)
         {
@@ -108,11 +108,11 @@ void Bot(const MqlRates &rates[])
         double currentProfit = PositionGetDouble(POSITION_PROFIT);
         Print("## Posisi Sedang Berjalan ## Profit: ", currentProfit);
 
-        if (currentProfit >= 0.75 && hedgeCount == 0)
+        if (currentProfit >= 1.5 && hedgeCount == 0)
         {
             if (trade.PositionClose("AUDUSD"))
             {
-                Print("Posisi ditutup karena profit lebih dari 0.75");
+                Print("Posisi ditutup karena profit lebih dari 1.5");
                 hedgeCount = 0;
             }
             else
