@@ -10,7 +10,7 @@ input int numberOfCandles = 5;
 input double lotSize = 0.01;
 input double spreadThreshold = 0.35;
 input int maPeriod = 5; 
-input double hedgeLossThreshold = -1.5;
+input double hedgeLossThreshold = -0.50;
 
 datetime lastCloseTime = 0;
 datetime lastRunTime = 0;
@@ -39,26 +39,29 @@ void OnTick()
         }
     }
     Print("Total profit from all open positions: ", totalProfit);
-
-    if (totalProfit >= 2.00 || totalProfit <= -5.00)
+if(hedgeCount > 0){
+    if (totalProfit >= 0 || totalProfit <= -3.00)
     {
         for (int i = 0; i < totalPositions; i++)
         {
             ulong ticket = PositionGetTicket(i);
             if (ticket != 0)
             {
+              string symbol = PositionGetString(POSITION_SYMBOL);
+              if (symbol == "AUDUSD"){
                 if (!trade.PositionClose(ticket))
                 {
                     Print("Error closing position ", ticket, ": ", GetLastError());
                 }
+                }
             }
         }
-        Print("All positions closed due to total profit reaching or exceeding 2.00");
+        Print("All positions closed due to total profit reaching or exceeding 0.75");
         return;
     }
-
+}
     MqlRates rates[];
-    int copied = CopyRates("XAUUSD", PERIOD_M1, 0, numberOfCandles, rates);
+    int copied = CopyRates("AUDUSD", PERIOD_M1, 0, numberOfCandles, rates);
     if (copied < numberOfCandles)
     {
         Print("Error retrieving historical data");
@@ -82,7 +85,7 @@ double CalculateMomentum(double &data[], int period)
 double CalculateMA(int period)
 {
     double ma[];
-    int maHandle = iMA("XAUUSD", PERIOD_M1, period, 0, MODE_SMA, PRICE_CLOSE);
+    int maHandle = iMA("AUDUSD", PERIOD_M1, period, 0, MODE_SMA, PRICE_CLOSE);
     if (maHandle < 0)
     {
         Print("Error creating MA handle");
@@ -100,16 +103,16 @@ double CalculateMA(int period)
 
 void Bot(const MqlRates &rates[])
 {
-    if (PositionSelect("XAUUSD"))
+    if (PositionSelect("AUDUSD"))
     {
         double currentProfit = PositionGetDouble(POSITION_PROFIT);
         Print("## Posisi Sedang Berjalan ## Profit: ", currentProfit);
 
-        if (currentProfit >= 1.5 && hedgeCount == 0)
+        if (currentProfit >= 0.75 && hedgeCount == 0)
         {
-            if (trade.PositionClose("XAUUSD"))
+            if (trade.PositionClose("AUDUSD"))
             {
-                Print("Posisi ditutup karena profit lebih dari 1.5");
+                Print("Posisi ditutup karena profit lebih dari 0.75");
                 hedgeCount = 0;
             }
             else
@@ -126,10 +129,12 @@ void Bot(const MqlRates &rates[])
         return;
     }
 
-    double bid = SymbolInfoDouble("XAUUSD", SYMBOL_BID);
-    double ask = SymbolInfoDouble("XAUUSD", SYMBOL_ASK);
+    double bid = SymbolInfoDouble("AUDUSD", SYMBOL_BID);
+    double ask = SymbolInfoDouble("AUDUSD", SYMBOL_ASK);
     double spread = NormalizeDouble(ask - bid, _Digits);
-
+    
+    Print("Spread :",spread);
+    
     if (spread > spreadThreshold)
     {
         Print("## Spread terlalu melebar ##");
@@ -156,12 +161,12 @@ void Bot(const MqlRates &rates[])
 
     if (momentumSum > 0 && rates[0].close > ma)
     {
-        if (PositionSelect("XAUUSD"))
+        if (PositionSelect("AUDUSD"))
         {
             Print("## Posisi sudah terbuka, tidak membuka posisi baru ##");
             return;
         }
-        if (trade.Buy(lotSize, "XAUUSD"))
+        if (trade.Buy(lotSize, "AUDUSD"))
         {
             Print("Buka posisi BUY");
             hedgeCount = 0;
@@ -174,12 +179,12 @@ void Bot(const MqlRates &rates[])
     }
     else if (momentumSum < -0 && rates[0].close < ma)
     {
-        if (PositionSelect("XAUUSD"))
+        if (PositionSelect("AUDUSD"))
         {
             Print("## Posisi sudah terbuka, tidak membuka posisi baru ##");
             return;
         }
-        if (trade.Sell(lotSize, "XAUUSD"))
+        if (trade.Sell(lotSize, "AUDUSD"))
         {
             Print("Buka posisi SELL");
             hedgeCount = 0;
@@ -204,14 +209,14 @@ void HedgePosition()
         return;
     }
 
-    if (PositionSelect("XAUUSD"))
+    if (PositionSelect("AUDUSD"))
     {
         double positionType = PositionGetInteger(POSITION_TYPE);
         double hedgeVolume = 0.02;
 
         if (positionType == POSITION_TYPE_BUY)
         {
-            if (trade.Sell(hedgeVolume, "XAUUSD"))
+            if (trade.Sell(hedgeVolume, "AUDUSD"))
             {
                 Print("Hedging dengan posisi SELL dengan volume ", hedgeVolume);
                 hedgeCount++;
@@ -223,7 +228,7 @@ void HedgePosition()
         }
         else if (positionType == POSITION_TYPE_SELL)
         {
-            if (trade.Buy(hedgeVolume, "XAUUSD"))
+            if (trade.Buy(hedgeVolume, "AUDUSD"))
             {
                 Print("Hedging dengan posisi BUY dengan volume ", hedgeVolume);
                 hedgeCount++;
